@@ -48,23 +48,39 @@ class GameScene extends Phaser.Scene {
     }
 
     handleGridClick(pointer) {
-        // 3. TRADUCTOR: Píxeles a Índices Lógicos
-        // Dividimos la posición del clic entre el tamaño del cuadro y redondeamos hacia abajo.
-        // Ej: Clic en X=100 -> 100 / 64 = 1.56 -> Math.floor() = 1 (Columna 1)
         const gridX = Math.floor(pointer.x / TILE_SIZE);
         const gridY = Math.floor(pointer.y / TILE_SIZE);
 
-        // 4. VALIDACIÓN DE LÍMITES (Out of Bounds Check)
-        // Evitamos errores si el usuario hace clic fuera de la pantalla
         if (gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS) {
-            
-            // Accedemos a la celda específica M[y][x]
             const clickedCell = this.logicGrid[gridY][gridX];
             
-            console.log(`\n--- CLIC DETECTADO ---`);
-            console.log(`Píxeles: X:${Math.round(pointer.x)}, Y:${Math.round(pointer.y)}`);
-            console.log(`Índices Matriz: Columna(X):${gridX}, Fila(Y):${gridY}`);
-            console.log('Estado de la celda:', clickedCell);
+            // Lógica de Construcción
+            if (clickedCell.id === 0) {
+                // 1. Actualizamos la memoria (Estado Lógico)
+                clickedCell.id = 1; // 1 representará nuestra Cinta Transportadora
+                clickedCell.direction = 'RIGHT'; // Por defecto mirará a la derecha
+                
+                // 2. Actualizamos la pantalla (Estado Visual)
+                const rect = this.add.graphics();
+                rect.fillStyle(0x00a8ff, 0.8); // Color azul brillante
+                
+                // Calculamos las coordenadas en píxeles para dibujar
+                // Le sumamos 2 y restamos 4 para dejar un pequeño margen y que se vea la cuadrícula
+                const pixelX = gridX * TILE_SIZE + 2;
+                const pixelY = gridY * TILE_SIZE + 2;
+                const size = TILE_SIZE - 4;
+                
+                rect.fillRect(pixelX, pixelY, size, size);
+                
+                // 3. Guardamos la referencia visual en nuestra matriz
+                // Esto es crucial para poder borrarlo o animarlo después
+                clickedCell.sprite = rect; 
+                
+                console.log(`Cinta construida en Col:${gridX}, Fila:${gridY}`);
+            } else {
+                // Si la celda ya tiene algo (id distinto de 0)
+                console.log("Error: La celda ya está ocupada.");
+            }
         }
     }
 
