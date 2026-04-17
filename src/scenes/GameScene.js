@@ -22,12 +22,38 @@ export default class GameScene extends Phaser.Scene {
         this.drawGrid();
         this.initializeGrid();
 
+        // --- INPUTS ---
         this.input.on('pointerdown', (pointer) => {
             this.handleGridClick(pointer);
         });
 
         this.input.keyboard.on('keydown-SPACE', () => {
             this.toggleGameState();
+        });
+
+        // TECLA 'I' para inyectar un item de prueba en [1][1]
+        // TECLA 'I' para inyectar un item de prueba en [1][1]
+        this.input.keyboard.on('keydown-I', () => {
+            const cell = this.logicGrid[1][1]; 
+            
+            if (cell.id === 1 && cell.item_id === null) {
+                cell.item_id = 99; 
+                
+                const itemSprite = this.add.graphics();
+                itemSprite.fillStyle(0xffff00, 1);
+                
+                // CORRECCIÓN: Dibujamos el cuadro en su origen local (0,0)
+                itemSprite.fillRect(0, 0, 32, 32); 
+                
+                // CORRECCIÓN: Movemos la posición 'x' e 'y' de todo el objeto
+                itemSprite.x = 1 * TILE_SIZE + 16;
+                itemSprite.y = 1 * TILE_SIZE + 16;
+                
+                cell.item_sprite = itemSprite;
+                console.log("📦 Item inyectado en [1][1]");
+            }else {
+                console.log("⚠️ Asegúrate de construir una cinta (cuadro azul) en la Fila 1, Columna 1 primero.");
+            }
         });
 
         this.time.addEvent({
@@ -52,7 +78,7 @@ export default class GameScene extends Phaser.Scene {
         }
     }
     //inicializar la grilla logica
-    initializeGrid() {
+   initializeGrid() {
         for (let y = 0; y < ROWS; y++) {
             let row = [];
             for (let x = 0; x < COLS; x++) {
@@ -60,7 +86,8 @@ export default class GameScene extends Phaser.Scene {
                     id: 0,
                     direction: null,
                     item_id: null,
-                    sprite: null
+                    item_sprite: null, // Nuevo: referencia visual del item
+                    moved_this_tick: false // Nuevo: bandera anti-teletransportación
                 });
             }
             this.logicGrid.push(row);
@@ -99,15 +126,56 @@ export default class GameScene extends Phaser.Scene {
     processTick() {
         if (this.gameState !== 'SIMULATING') return;
 
-        console.log("⏱️ --- TICK LOGICO ---");
+        // Paso A: Limpiar las banderas de movimiento
+        for (let y = 0; y < ROWS; y++) {
+            for (let x = 0; x < COLS; x++) {
+                this.logicGrid[y][x].moved_this_tick = false;
+            }
+        }
+
+        // Paso B: Procesar el movimiento
         for (let y = 0; y < ROWS; y++) {
             for (let x = 0; x < COLS; x++) {
                 const cell = this.logicGrid[y][x];
-                if (cell.id === 1) {
-                    cell.sprite.alpha = 0.5;
-                    this.time.delayedCall(150, () => {
-                        cell.sprite.alpha = 0.8; 
-                    });
+                
+                // Si la celda tiene una cinta, tiene un item, y no se ha movido
+                if (cell.id === 1 && cell.item_id !== null && !cell.moved_this_tick) {
+                    
+                    let nextX = x;
+                    let nextY = y;
+                    
+                    // Nota: Por ahora todas nuestras cintas miran a la derecha por defecto
+                    if (cell.direction === 'RIGHT') nextX += 1;
+                    if (cell.direction === 'LEFT') nextX -= 1;
+                    if (cell.direction === 'UP') nextY -= 1;
+                    if (cell.direction === 'DOWN') nextY += 1;
+
+                    if (nextX >= 0 && nextX < COLS && nextY >= 0 && nextY < ROWS) {
+                        const nextCell = this.logicGrid[nextY][nextX];
+
+                        if (nextCell.id === 1 && nextCell.item_id === null) {
+                            
+                            // TRANSFERENCIA LÓGICA
+                            nextCell.item_id = cell.item_id;
+                            nextCell.item_sprite = cell.item_sprite;
+                            nextCell.moved_this_tick = true; 
+
+                            cell.item_id = null;
+                            cell.item_sprite = null;
+
+                            // CORRECCIÓN ANIMACIÓN VISUAL: Movemos las coordenadas X y Y directamente
+                            const targetPixelX = nextX * TILE_SIZE + 16;
+                            const targetPixelY = nextY * TILE_SIZE + 16;
+
+                            this.tweens.add({
+                                targets: nextCell.item_sprite, 
+                                x: targetPixelX, 
+                                y: targetPixelY, 
+                                duration: 400, 
+                                ease: 'Linear'
+                            });
+                        }
+                    }
                 }
             }
         }
