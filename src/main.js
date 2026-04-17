@@ -9,25 +9,42 @@ class GameScene extends Phaser.Scene {
         super('GameScene');
         // Declaramos nuestra matriz a nivel de clase para acceder a ella desde cualquier función
         this.logicGrid = []; 
+        this.gameState = 'BUILDING'; 
     }
 
     create() {
-        this.add.text(20, 20, '> SISTEMA INICIADO: FACTORIA', { 
+        // Guardamos el texto en una variable (this.statusText) para poder cambiarlo después
+        this.statusText = this.add.text(20, 20, '> MODO: CONSTRUCCIÓN (Presiona ESPACIO)', { 
             fontFamily: 'monospace', 
             fontSize: '20px', 
             fill: '#00ff88' 
         });
 
         this.drawGrid();
-        
-        // 1. INICIALIZAR LA MATRIZ LÓGICA
         this.initializeGrid();
 
-        // 2. ESCUCHAR EL INPUT DEL JUGADOR
-        // Phaser maneja los eventos de mouse o táctiles con 'pointerdown'
         this.input.on('pointerdown', (pointer) => {
             this.handleGridClick(pointer);
         });
+
+        // ESCUCHAMOS LA BARRA ESPACIADORA
+        this.input.keyboard.on('keydown-SPACE', () => {
+            this.toggleGameState();
+        });
+    }
+
+    toggleGameState() {
+        if (this.gameState === 'BUILDING') {
+            this.gameState = 'SIMULATING';
+            this.statusText.setText('> MODO: SIMULACIÓN (Ejecutando...)');
+            this.statusText.setColor('#ffaa00'); // Cambia a color naranja
+            console.log("--- MODO SIMULACIÓN INICIADO ---");
+        } else {
+            this.gameState = 'BUILDING';
+            this.statusText.setText('> MODO: CONSTRUCCIÓN (Presiona ESPACIO)');
+            this.statusText.setColor('#00ff88'); // Vuelve a verde
+            console.log("--- MODO CONSTRUCCIÓN INICIADO ---");
+        }
     }
 
     initializeGrid() {
@@ -48,6 +65,13 @@ class GameScene extends Phaser.Scene {
     }
 
     handleGridClick(pointer) {
+
+        //Candado logico
+        if (this.gameState === 'SIMULATING'){
+            console.log('Error: No puedes construir mientras la simulacion esta ejecutandose. Presiona ESPACIO para volver al modo construcción.');
+            return;
+        }
+
         const gridX = Math.floor(pointer.x / TILE_SIZE);
         const gridY = Math.floor(pointer.y / TILE_SIZE);
 
