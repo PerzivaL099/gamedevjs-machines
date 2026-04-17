@@ -1,4 +1,6 @@
 ---
+name: "Sprint 3: Grafo y Movimiento"
+about: "Matemáticas de vectores para transferir objetos."
 title: 'feat: Lógica de transferencia de items entre celdas'
 labels: feature, sprint-3
 ---

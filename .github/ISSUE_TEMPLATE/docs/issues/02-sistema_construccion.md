@@ -1,4 +1,6 @@
 ---
+name: "Sprint 1: Sistema de Construcción"
+about: "Mecánica para colocar máquinas usando el mouse."
 title: 'feat: Permitir colocar cintas transportadoras con el mouse'
 labels: enhancement, sprint-1
 ---

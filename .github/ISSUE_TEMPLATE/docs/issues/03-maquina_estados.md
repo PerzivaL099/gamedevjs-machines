@@ -1,4 +1,6 @@
 ---
+name: "Sprint 2: Máquina de Estados"
+about: "Controlar cuándo el juego está en pausa vs en simulación."
 title: 'feat: Implementar estados BUILDING y SIMULATING'
 labels: feature, sprint-2
 ---

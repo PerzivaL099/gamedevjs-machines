@@ -1,4 +1,6 @@
 ---
+name: "Sprint 1: Matriz Lógica"
+about: "Crear la estructura de datos base para el tablero."
 title: 'feat: Implementar Matriz Lógica bidimensional para el mapa'
 labels: enhancement, sprint-1
 ---

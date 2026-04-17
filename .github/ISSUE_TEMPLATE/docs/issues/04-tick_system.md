@@ -1,4 +1,6 @@
 ---
+name: "Sprint 3: Tick System (Game Loop)"
+about: "Temporizador lógico independiente de los FPS gráficos."
 title: 'core: Crear el Sistema de Ticks para procesar la fábrica'
 labels: core, sprint-3
 ---
